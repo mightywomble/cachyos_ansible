@@ -1,0 +1,12 @@
+---
+- name: Install security and system utilities
+  tags: security_utilities
+  block:
+    # Pacman packages
+    - name: Install pacman security utilities
+      become: true
+      pacman:
+        name:
+          - extra/fprintd  # Fingerprint daemon
+        state: present
+        update_cache: "{{ pacman_update_cache }}"

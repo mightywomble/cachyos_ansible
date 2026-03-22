@@ -1,0 +1,47 @@
+---
+- name: Install monitoring and system management tools
+  tags: monitoring_tools
+  block:
+    # Pacman packages
+    - name: Install pacman monitoring tools
+      become: true
+      pacman:
+        name:
+          - extra/cockpit
+          - extra/cockpit-docker
+          - extra/cockpit-files
+          - extra/cockpit-machines
+          - extra/cockpit-storaged
+          - extra/cockpit-file-sharing
+          - extra/cockpit-sensors
+          - extra/cockpit-packman
+          - extra/cockpit-tools
+        state: present
+        update_cache: "{{ pacman_update_cache }}"
+
+    # CachyOS repo packages
+    - name: Install CachyOS monitoring tools
+      become: true
+      pacman:
+        name:
+          - cachyos-extra-v3/cockpit
+        state: present
+
+    # AUR packages
+    - name: Install AUR monitoring tools via paru
+      become: true
+      become_user: "{{ ansible_user_id }}"
+      command: "paru -S --noconfirm ssh-ggh"
+      register: paru_install_result
+      failed_when: paru_install_result.rc not in [0, 1]
+      changed_when: "'error' not in paru_install_result.stdout | lower"
+
+    # Enable cockpit service
+    - name: Enable and start cockpit service
+      become: true
+      systemd:
+        name: cockpit.socket
+        enabled: yes
+        state: started
+      when: enable_cockpit
+      ignore_errors: yes

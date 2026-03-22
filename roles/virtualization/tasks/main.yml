@@ -1,0 +1,12 @@
+---
+- name: Install virtualization tools
+  tags: virtualization
+  block:
+    # Pacman packages
+    - name: Install pacman virtualization tools
+      become: true
+      pacman:
+        name:
+          - extra/virt-manager
+        state: present
+        update_cache: "{{ pacman_update_cache }}"

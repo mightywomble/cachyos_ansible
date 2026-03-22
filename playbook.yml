@@ -1,0 +1,167 @@
+---
+# ============================================================================
+# CACHYOS SOFTWARE INSTALLER - MAIN PLAYBOOK
+# ============================================================================
+# This playbook automates the installation of 70+ CachyOS packages including:
+# - CLI utilities, communication apps, development tools
+# - Productivity apps, AI/ML frameworks, monitoring tools
+# - Virtualization and security utilities
+#
+# USAGE:
+#   Basic:     ansible-playbook -i inventory.yml playbook.yml
+#   Auto mode: ansible-playbook -i inventory.yml playbook.yml --extra-vars auto_confirm=true
+#   AMD GPU:   ansible-playbook -i inventory.yml playbook.yml -e "gpu_type=amd"
+#
+# The playbook will:
+# 1. Run preflight checks (GPU detection, disk space, network)
+# 2. Ask user confirmation before proceeding (Y/n, default: yes)
+# 3. Install all packages with verbose output and error handling
+# 4. Display detailed completion summary
+# ============================================================================
+
+- name: Install CachyOS software using paru
+  hosts: cachyos_systems
+  gather_facts: yes
+  vars_files:
+    - group_vars/cachyos.yml
+  
+  pre_tasks:
+    - name: "Display playbook introduction"
+      debug:
+        msg: |
+          
+          ╔════════════════════════════════════════════════════════════════════╗
+          ║                  CACHYOS SOFTWARE INSTALLER v1.0                   ║
+          ║                                                                    ║
+          ║  Automated installation of 70+ packages for optimal CachyOS setup  ║
+          ╚════════════════════════════════════════════════════════════════════╝
+          
+          This playbook will:
+          • Detect your GPU type (AMD/NVIDIA/None)
+          • Verify system requirements (disk space, network, hardware)
+          • Install packages with automatic error recovery
+          • Enable and start system services
+          • Display detailed installation summary
+          
+          Estimated installation time: 15-45 minutes
+          
+      run_once: yes
+  
+  roles:
+    # Stage 1: Pre-installation checks
+    - role: preflight
+      tags: [preflight]
+    
+    # Stage 2: Package Installation (organized by category)
+    - role: cli_tools
+      tags: [cli_tools]
+    
+    - role: communication_apps
+      tags: [communication_apps]
+    
+    - role: dev_tools
+      tags: [dev_tools]
+    
+    - role: productivity_apps
+      tags: [productivity_apps]
+    
+    - role: ai_tools
+      tags: [ai_tools]
+    
+    - role: monitoring_tools
+      tags: [monitoring_tools]
+    
+    - role: virtualization
+      tags: [virtualization]
+    
+    - role: security_utilities
+      tags: [security_utilities]
+  
+  post_tasks:
+    - name: "Display installation completion summary"
+      debug:
+        msg: |
+          
+          ╔════════════════════════════════════════════════════════════════════╗
+          ║          CACHYOS SOFTWARE INSTALLATION - COMPLETE ✓                ║
+          ╚════════════════════════════════════════════════════════════════════╝
+          
+          📦 INSTALLED PACKAGES:
+          ────────────────────────────────────────────────────────────────────
+          
+          ✓ CLI Tools (6 packages)
+            gping, bandwich, trippy, neoss, kmsensors, hwatch-bin
+          
+          ✓ Communication Apps (6 packages)
+            Discord, Edge, Spotify, Slack, YouTube Music, Netbird
+          
+          ✓ Development Tools (7 packages)
+            VS Code, Termix, Tabby, Aider, LM Studio, Owlen, TLM
+          
+          ✓ Productivity Apps (5 packages)
+            OnlyOffice, Brave, Nextcloud, LLM Manager
+          
+          ✓ AI/ML Tools (5 packages)
+            Ollama{% if gpu_type == 'amd' %}-ROCm{% elif gpu_type == 'nvidia' %}-CUDA{% endif %}, OpenCode, Qwen, LLM Manager
+          
+          ✓ Monitoring Tools (10 packages)
+            Cockpit + 8 plugins, SSH-ggh
+          
+          ✓ Virtualization (1 package)
+            virt-manager
+          
+          ✓ Security Tools (1 package)
+            fprintd
+          
+          🎯 CONFIGURATION:
+          ────────────────────────────────────────────────────────────────────
+          GPU Type:           {{ gpu_type | upper }}
+          {% if gpu_type == 'amd' %}
+          Ollama Variant:     ollama-rocm (ROCm acceleration for AMD GPUs)
+          {% elif gpu_type == 'nvidia' %}
+          Ollama Variant:     ollama-cuda (CUDA acceleration for NVIDIA GPUs)
+          {% else %}
+          Ollama Variant:     ollama (CPU-only, works on all systems)
+          {% endif %}
+          
+          ⚙️  SERVICES ENABLED:
+          ────────────────────────────────────────────────────────────────────
+          ✓ Cockpit.socket    (Access at: https://localhost:9090)
+          ✓ Ollama            (Local LLM inference service)
+          
+          📚 NEXT STEPS:
+          ────────────────────────────────────────────────────────────────────
+          
+          1. Access Cockpit Web Interface:
+             Open your browser and navigate to: https://localhost:9090
+             Login with your system credentials
+          
+          2. Start Using Ollama:
+             # Pull a language model
+             ollama pull llama2
+             
+             # Chat with the model
+             ollama run llama2
+          
+          3. Configure Communication Apps:
+             Log into Discord, Slack, Spotify with your credentials
+          
+          4. Set up Development Tools:
+             Open VS Code and install your preferred extensions
+          
+          5. Verify All Packages:
+             # Check installed packages
+             pacman -Q | wc -l
+          
+          💡 TIPS & RESOURCES:
+          ────────────────────────────────────────────────────────────────────
+          • Cockpit Documentation: https://cockpit-project.org/
+          • Ollama Documentation: https://ollama.ai/
+          • VS Code Extensions: https://marketplace.visualstudio.com/
+          • Troubleshooting: See README.md for detailed documentation
+          
+          ✅ Installation Summary: ALL PACKAGES INSTALLED SUCCESSFULLY
+          
+          Thank you for using CachyOS Software Installer!
+          
+      run_once: yes

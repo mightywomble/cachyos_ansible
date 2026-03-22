@@ -1,0 +1,49 @@
+---
+- name: Install AI and ML tools with GPU support
+  tags: ai_tools
+  block:
+    # Pacman packages (base ollama)
+    - name: Install base AI tools via pacman
+      become: true
+      pacman:
+        name:
+          - extra/llm-manager
+        state: present
+        update_cache: "{{ pacman_update_cache }}"
+
+    # CachyOS repo packages
+    - name: Install CachyOS AI tools (base)
+      become: true
+      pacman:
+        name:
+          - cachyos-extra-v3/ollama
+          - cachyos-extra-v3/opencode
+          - cachyos-extra-v3/qwen-code
+        state: present
+
+    # GPU-specific ollama packages
+    - name: Install ollama with AMD GPU support (ROCm)
+      become: true
+      pacman:
+        name:
+          - cachyos-extra-v3/ollama-rocm
+        state: present
+      when: gpu_type == 'amd'
+
+    - name: Install ollama with NVIDIA GPU support (CUDA)
+      become: true
+      pacman:
+        name:
+          - cachyos-extra-v3/ollama-cuda
+        state: present
+      when: gpu_type == 'nvidia'
+
+    # Enable ollama service
+    - name: Enable and start ollama service
+      become: true
+      systemd:
+        name: ollama
+        enabled: yes
+        state: started
+      when: enable_ollama
+      ignore_errors: yes  # In case service doesn't exist yet

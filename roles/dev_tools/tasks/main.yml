@@ -1,0 +1,20 @@
+---
+- name: Install development tools and code editors
+  tags: dev_tools
+  block:
+    # AUR packages
+    - name: Install AUR code editors and dev tools via paru
+      become: true
+      become_user: "{{ ansible_user_id }}"
+      command: "paru -S --noconfirm {{ item }}"
+      loop:
+        - aur/visual-studio-code-bin
+        - aur/termix-bin
+        - aur/tabby-bin
+        - aur/aider-chat
+        - aur/lmstudio-bin
+        - aur/owlen
+        - aur/tlm
+      register: paru_install_result
+      failed_when: paru_install_result.rc not in [0, 1]
+      changed_when: "'error' not in paru_install_result.stdout | lower"

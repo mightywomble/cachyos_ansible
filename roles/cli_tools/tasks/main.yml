@@ -1,0 +1,120 @@
+---
+# ============================================================================
+# CLI TOOLS AND UTILITIES INSTALLATION ROLE
+# ============================================================================
+# This role installs command-line utilities for system monitoring, networking,
+# and productivity. These tools run in the terminal and are lightweight.
+#
+# PACMAN PACKAGES (Official Arch Linux Repositories):
+#   - gping: Graphical ping utility with real-time graph
+#   - bandwich: Bandwidth usage monitoring per process
+#   - trippy: Network diagnostic tool (like mtr, shows routing hops)
+#   - neoss: System monitor showing top processes
+#   - kmsensors: Temperature and hardware sensor monitoring
+#   - hwatch-bin: Process monitoring tool with color output
+#
+# AUR PACKAGES (Community packages from Arch User Repository):
+#   - lazyjournal-bin: Terminal-based journal/note taking app
+#   - pacseek-bin: Interactive Pacman package search tool
+#   - loggo-bin: Colorful log viewer
+#   - oatmeal-bin: Terminal graphics/drawing tool
+#   - wifitui-bin: WiFi connection manager for terminal
+#
+# Installation Strategy:
+#   - Pacman: Fast, official source, parallel install OK
+#   - AUR: Via paru, one at a time, non-blocking errors
+# ============================================================================
+
+- name: "[CLI_TOOLS] Installing command-line utilities and system tools"
+  tags: cli_tools
+  block:
+    # ========================================================================
+    # SECTION 1: PACMAN CLI TOOLS (Official Repositories)
+    # ========================================================================
+    # These are from official CachyOS/Arch repositories and install quickly
+    
+    - name: "[CLI_TOOLS] Installing Pacman CLI tools..."
+      debug:
+        msg: "Installing 6 CLI utilities from official repositories: gping, bandwich, trippy, neoss, kmsensors, hwatch-bin"
+    
+    - name: "[CLI_TOOLS] Install pacman CLI tools from official repositories"
+      become: true
+      pacman:
+        name:
+          - gping          # Real-time ping visualization tool
+          - bandwich       # Bandwidth monitor showing per-process usage
+          - trippy         # Network diagnostic tool (like mtr, shows routing)
+          - hwatch-bin     # Process monitor with colored output
+          - neoss          # System monitor showing CPU/Memory/Disk usage
+          - kmsensors      # Hardware sensor monitoring (CPU temp, fan speed)
+        state: present
+        update_cache: "{{ pacman_update_cache }}"
+      register: pacman_cli_result
+      ignore_errors: true
+    
+    - name: "[CLI_TOOLS] Show pacman installation status"
+      debug:
+        msg: "✓ Pacman CLI tools installation status: {{ 'Success' if pacman_cli_result is succeeded else 'Failed (continuing)' }}"
+
+    # ========================================================================
+    # SECTION 2: AUR CLI TOOLS (Via paru)
+    # ========================================================================
+    # These are from the Arch User Repository and may take longer to compile
+    
+    - name: "[CLI_TOOLS] Installing AUR CLI tools (via paru)..."
+      debug:
+        msg: |
+          Installing 6 AUR CLI utilities. These may take longer as they compile from source.
+          Packages: lazyjournal-bin, pacseek-bin, loggo-bin, oatmeal-bin, wifitui-bin
+    
+    # Install AUR packages one at a time to prevent total failure if one fails
+    - name: "[CLI_TOOLS] Install lazyjournal-bin (terminal journal app)"
+      become: true
+      become_user: "{{ ansible_user_id }}"
+      command: "paru -S --noconfirm lazyjournal-bin"
+      register: paru_lazyjournal
+      failed_when: false
+      changed_when: "'error' not in paru_lazyjournal.stdout | lower and paru_lazyjournal.rc == 0"
+    
+    - name: "[CLI_TOOLS] Install pacseek-bin (Pacman package searcher)"
+      become: true
+      become_user: "{{ ansible_user_id }}"
+      command: "paru -S --noconfirm pacseek-bin"
+      register: paru_pacseek
+      failed_when: false
+      changed_when: "'error' not in paru_pacseek.stdout | lower and paru_pacseek.rc == 0"
+    
+    - name: "[CLI_TOOLS] Install loggo-bin (Log viewer with colors)"
+      become: true
+      become_user: "{{ ansible_user_id }}"
+      command: "paru -S --noconfirm loggo-bin"
+      register: paru_loggo
+      failed_when: false
+      changed_when: "'error' not in paru_loggo.stdout | lower and paru_loggo.rc == 0"
+    
+    - name: "[CLI_TOOLS] Install oatmeal-bin (Terminal drawing tool)"
+      become: true
+      become_user: "{{ ansible_user_id }}"
+      command: "paru -S --noconfirm oatmeal-bin"
+      register: paru_oatmeal
+      failed_when: false
+      changed_when: "'error' not in paru_oatmeal.stdout | lower and paru_oatmeal.rc == 0"
+    
+    - name: "[CLI_TOOLS] Install wifitui-bin (WiFi connection manager TUI)"
+      become: true
+      become_user: "{{ ansible_user_id }}"
+      command: "paru -S --noconfirm wifitui-bin"
+      register: paru_wifitui
+      failed_when: false
+      changed_when: "'error' not in paru_wifitui.stdout | lower and paru_wifitui.rc == 0"
+    
+    - name: "[CLI_TOOLS] CLI tools installation complete"
+      debug:
+        msg: |
+          ✓ CLI Tools installation finished
+          Status Summary:
+          - lazyjournal-bin: {{ 'Installed' if 'already' in paru_lazyjournal.stdout or paru_lazyjournal.rc == 0 else 'Skipped' }}
+          - pacseek-bin:     {{ 'Installed' if 'already' in paru_pacseek.stdout or paru_pacseek.rc == 0 else 'Skipped' }}
+          - loggo-bin:       {{ 'Installed' if 'already' in paru_loggo.stdout or paru_loggo.rc == 0 else 'Skipped' }}
+          - oatmeal-bin:     {{ 'Installed' if 'already' in paru_oatmeal.stdout or paru_oatmeal.rc == 0 else 'Skipped' }}
+          - wifitui-bin:     {{ 'Installed' if 'already' in paru_wifitui.stdout or paru_wifitui.rc == 0 else 'Skipped' }}

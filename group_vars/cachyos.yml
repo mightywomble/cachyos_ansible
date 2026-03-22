@@ -1,0 +1,13 @@
+---
+# Global variables for CachyOS package installation
+
+# GPU Configuration - auto-detected by preflight role.
+# Optional override: amd | nvidia | none | auto
+gpu_type: "auto"
+
+# Package management
+pacman_update_cache: true
+
+# Service activation
+enable_cockpit: true
+enable_ollama: true

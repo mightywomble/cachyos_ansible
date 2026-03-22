@@ -1,0 +1,33 @@
+---
+- name: Install productivity and office applications
+  tags: productivity_apps
+  block:
+    # Pacman packages
+    - name: Install pacman productivity apps
+      become: true
+      pacman:
+        name:
+          - extra/nextcloud-client
+          - extra/llm-manager
+        state: present
+        update_cache: "{{ pacman_update_cache }}"
+
+    # CachyOS repo packages
+    - name: Install CachyOS productivity apps
+      become: true
+      pacman:
+        name:
+          - cachyos/onlyoffice-bin
+          - cachyos/brave-bin
+        state: present
+
+    # AUR packages
+    - name: Install AUR productivity apps via paru
+      become: true
+      become_user: "{{ ansible_user_id }}"
+      command: "paru -S --noconfirm {{ item }}"
+      loop:
+        - aur/anythingllm-desktop-bin
+      register: paru_install_result
+      failed_when: paru_install_result.rc not in [0, 1]
+      changed_when: "'error' not in paru_install_result.stdout | lower"

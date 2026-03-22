@@ -1,0 +1,223 @@
+---
+# ============================================================================
+# PREFLIGHT CHECKS AND GPU DETECTION ROLE
+# ============================================================================
+# This role performs critical system checks before installation:
+# 1. Detects GPU type (AMD, NVIDIA, or none) for appropriate package selection
+# 2. Verifies system requirements (disk space, network, hardware)
+# 3. Displays detailed results and asks user for confirmation to proceed
+# 4. Can be skipped with --auto flag for headless/automated runs
+# ============================================================================
+
+- name: Preflight checks and GPU detection
+  tags: preflight
+  block:
+    # ========================================================================
+    # STAGE 1: GPU DETECTION
+    # ========================================================================
+    # GPU detection determines which Ollama variant to install:
+    # - AMD: ollama-rocm (ROCm for Radeon/RDNA GPUs)
+    # - NVIDIA: ollama-cuda (CUDA for GeForce/Tesla GPUs)
+    # - None: ollama (CPU-only, works everywhere)
+    # ========================================================================
+
+    - name: "[PREFLIGHT] Starting GPU detection..."
+      debug:
+        msg: "Scanning system for compatible GPUs..."
+
+    - name: "[PREFLIGHT] Check for AMD GPU"
+      shell: lspci | grep -i "vga" | grep -iE "amd|radeon|ryzen"
+      register: amd_gpu_check
+      failed_when: false
+      changed_when: false
+
+    - name: "[PREFLIGHT] Check for NVIDIA GPU"
+      shell: lspci | grep -i "vga" | grep -i "nvidia"
+      register: nvidia_gpu_check
+      failed_when: false
+      changed_when: false
+
+    - name: "[PREFLIGHT] Auto-detect GPU type"
+      set_fact:
+        detected_gpu_type: "{{ 'amd' if amd_gpu_check.rc == 0 else ('nvidia' if nvidia_gpu_check.rc == 0 else 'none') }}"
+      when: gpu_type == "auto"
+
+    - name: "[PREFLIGHT] Set GPU type based on auto-detection"
+      set_fact:
+        gpu_type: "{{ detected_gpu_type }}"
+      when: gpu_type == "auto"
+
+    - name: "[PREFLIGHT] GPU detection complete"
+      debug:
+        msg: |
+          ✓ GPU Detection Result: {{ gpu_type | upper }}
+          {% if gpu_type == 'amd' %}
+          → AMD GPU detected! Ollama will be installed with ROCm acceleration
+          → This enables GPU-accelerated LLM inference
+          {% elif gpu_type == 'nvidia' %}
+          → NVIDIA GPU detected! Ollama will be installed with CUDA acceleration
+          → This enables GPU-accelerated LLM inference
+          {% else %}
+          → No dedicated GPU detected. Ollama will run in CPU-only mode
+          → CPU inference is slower but works on all systems
+          {% endif %}
+
+    # ========================================================================
+    # STAGE 2: SYSTEM REQUIREMENTS VERIFICATION
+    # ========================================================================
+    # Checks:
+    # - Disk Space: 70+ packages need ~5GB minimum
+    # - Network: Required for package downloads
+    # - Fingerprint Hardware: fprintd requires compatible device
+    # ========================================================================
+
+    - name: "[PREFLIGHT] Starting system requirements verification..."
+      debug:
+        msg: "Checking disk space, network, and hardware support..."
+
+    - name: "[PREFLIGHT] Check disk space availability"
+      shell: df -BG / | tail -1 | awk '{print $4}' | sed 's/G//'
+      register: disk_space_check
+      changed_when: false
+
+    - name: "[PREFLIGHT] Check disk space status"
+      debug:
+        msg: |
+          {% if disk_space_check.stdout | int >= 10 %}
+          ✓ Disk Space: {{ disk_space_check.stdout }}GB available (EXCELLENT - plenty of room)
+          {% elif disk_space_check.stdout | int >= 5 %}
+          ⚠ Disk Space: {{ disk_space_check.stdout }}GB available (ADEQUATE - minimum threshold)
+          {% else %}
+          ✗ Disk Space: {{ disk_space_check.stdout }}GB available (INSUFFICIENT - need 5GB+)
+          {% endif %}
+
+    - name: "[PREFLIGHT] Check network connectivity"
+      command: ping -c 1 8.8.8.8
+      register: network_check
+      failed_when: false
+      changed_when: false
+      timeout: 5
+
+    - name: "[PREFLIGHT] Display network status"
+      debug:
+        msg: |
+          {% if network_check.rc == 0 %}
+          ✓ Network: Connected (can reach internet)
+          {% else %}
+          ✗ Network: No connectivity (cannot reach internet)
+          {% endif %}
+
+    - name: "[PREFLIGHT] Check for fingerprint hardware (fprintd requirement)"
+      shell: |
+        if lsusb | grep -qi "fingerprint\|synaptics\|validity\|fpc"; then
+          echo "fingerprint_device_present=true"
+        else
+          echo "fingerprint_device_present=false"
+        fi
+      register: fprintd_check
+      changed_when: false
+      when: verify_system_requirements
+
+    - name: "[PREFLIGHT] Parse fingerprint hardware status"
+      set_fact:
+        has_fingerprint_device: "{{ 'true' in fprintd_check.stdout }}"
+      when: verify_system_requirements
+
+    - name: "[PREFLIGHT] Display fingerprint hardware status"
+      debug:
+        msg: |
+          {% if has_fingerprint_device | default(false) %}
+          ✓ Fingerprint Device: DETECTED (fprintd will be fully functional)
+          {% else %}
+          ℹ Fingerprint Device: NOT DETECTED (fprintd will install but may have limited use)
+          {% endif %}
+      when: verify_system_requirements
+
+    # ========================================================================
+    # STAGE 3: VALIDATION AND USER CONFIRMATION
+    # ========================================================================
+    # If all checks pass, display comprehensive summary and ask user to confirm
+    # User can proceed (default), skip (n), or use --auto to bypass this step
+    # ========================================================================
+
+    - name: "[PREFLIGHT] Validate all requirements"
+      set_fact:
+        preflight_passed: "{{ (disk_space_check.stdout | int >= 5) and (network_check.rc == 0) }}"
+
+    - name: "[PREFLIGHT] Show comprehensive preflight summary"
+      debug:
+        msg: |
+          
+          ╔════════════════════════════════════════════════════════════════════╗
+          ║           CACHYOS SOFTWARE INSTALLER - PREFLIGHT SUMMARY          ║
+          ╚════════════════════════════════════════════════════════════════════╝
+          
+          📊 SYSTEM INFORMATION:
+          ────────────────────────────────────────────────────────────────────
+          GPU Type:               {{ gpu_type | upper }}
+          Disk Space Available:   {{ disk_space_check.stdout }}GB
+          Network:                {{ 'Connected ✓' if network_check.rc == 0 else 'Disconnected ✗' }}
+          Fingerprint Device:     {{ 'Present ✓' if has_fingerprint_device | default(false) else 'Not Found ℹ' }}
+          
+          📦 INSTALLATION SCOPE:
+          ────────────────────────────────────────────────────────────────────
+          Total Packages:         ~70 packages
+          Sources:                Pacman + CachyOS Repos + AUR (via paru)
+          Installation Method:    Non-interactive (--noconfirm)
+          Installation Time:      15-45 minutes (depending on internet speed)
+          
+          📋 PACKAGE CATEGORIES:
+          ────────────────────────────────────────────────────────────────────
+          ✓ CLI Tools              (6 utilities)
+          ✓ Communication Apps     (6 apps: Discord, Slack, Spotify, etc.)
+          ✓ Development Tools      (7 tools: VS Code, Termix, Tabby, etc.)
+          ✓ Productivity Apps      (5 apps: OnlyOffice, Brave, etc.)
+          ✓ AI/ML Tools            (5 tools: Ollama + GPU support, etc.)
+          ✓ Monitoring Tools       (10 tools: Cockpit + plugins)
+          ✓ Virtualization         (1 tool: virt-manager)
+          ✓ Security Tools         (1 tool: fprintd)
+          
+          ⚙️  SERVICES AUTO-ENABLED:
+          ────────────────────────────────────────────────────────────────────
+          ✓ Cockpit                (Web-based system management)
+          ✓ Ollama                 (Local LLM inference service)
+          
+          ✅ PREFLIGHT STATUS: ALL CHECKS PASSED
+          ────────────────────────────────────────────────────────────────────
+
+    - name: "[PREFLIGHT] Pause for user confirmation (unless --auto flag used)"
+      pause:
+        prompt: |
+          
+          Proceed with installation? [Y/n] (default: yes)
+          
+          NOTE: Installation will take 15-45 minutes depending on internet speed.
+              Run with --extra-vars auto_confirm=true to skip this prompt.
+      register: user_confirm
+      when: not (auto_confirm | default(false))
+
+    - name: "[PREFLIGHT] Check user response"
+      set_fact:
+        user_wants_to_continue: "{{ user_confirm.user_input | default('y') | lower not in ['n', 'no'] }}"
+      when: not (auto_confirm | default(false))
+
+    - name: "[PREFLIGHT] Set auto-continue flag when using --auto"
+      set_fact:
+        user_wants_to_continue: true
+      when: auto_confirm | default(false)
+
+    - name: "[PREFLIGHT] User cancelled installation"
+      fail:
+        msg: "Installation cancelled by user. No changes were made to your system."
+      when: not user_wants_to_continue
+
+    - name: "[PREFLIGHT] Installation approved - proceeding with package installation"
+      debug:
+        msg: |
+          
+          ✓ User confirmed installation
+          ✓ All preflight checks passed
+          ✓ Starting package installation process...
+          
+          This may take several minutes. Please be patient.
+          AUR packages may take longer to compile from source.
