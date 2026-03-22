@@ -116,12 +116,10 @@
         fi
       register: fprintd_check
       changed_when: false
-      when: verify_system_requirements
 
     - name: "[PREFLIGHT] Parse fingerprint hardware status"
       set_fact:
         has_fingerprint_device: "{{ 'true' in fprintd_check.stdout }}"
-      when: verify_system_requirements
 
     - name: "[PREFLIGHT] Display fingerprint hardware status"
       debug:
@@ -131,7 +129,6 @@
           {% else %}
           ℹ Fingerprint Device: NOT DETECTED (fprintd will install but may have limited use)
           {% endif %}
-      when: verify_system_requirements
 
     # ========================================================================
     # STAGE 3: VALIDATION AND USER CONFIRMATION
@@ -194,17 +191,17 @@
           NOTE: Installation will take 15-45 minutes depending on internet speed.
               Run with --extra-vars auto_confirm=true to skip this prompt.
       register: user_confirm
-      when: not (auto_confirm | default(false))
+      when: auto_confirm | default(false) | string | lower != 'true'
 
     - name: "[PREFLIGHT] Check user response"
       set_fact:
         user_wants_to_continue: "{{ user_confirm.user_input | default('y') | lower not in ['n', 'no'] }}"
-      when: not (auto_confirm | default(false))
+      when: auto_confirm | default(false) | string | lower != 'true'
 
     - name: "[PREFLIGHT] Set auto-continue flag when using --auto"
       set_fact:
         user_wants_to_continue: true
-      when: auto_confirm | default(false)
+      when: auto_confirm | default(false) | string | lower == 'true'
 
     - name: "[PREFLIGHT] User cancelled installation"
       fail:

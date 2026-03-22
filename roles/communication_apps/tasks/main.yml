@@ -23,7 +23,7 @@
     # AUR/Paru packages
     - name: Install AUR communication apps via paru
       become: true
-      become_user: "{{ ansible_user_id }}"
+      become_user: "{{ ansible_facts.user_id }}"
       command: "paru -S --noconfirm {{ item }}"
       loop:
         - aur/microsoft-edge-stable-bin

@@ -7,11 +7,12 @@
 #
 # PACMAN PACKAGES (Official Arch Linux Repositories):
 #   - gping: Graphical ping utility with real-time graph
-#   - bandwich: Bandwidth usage monitoring per process
+#   - bandwhich: Bandwidth usage monitoring per process
 #   - trippy: Network diagnostic tool (like mtr, shows routing hops)
+#
+# AUR PACKAGES (Community packages from Arch User Repository):
 #   - neoss: System monitor showing top processes
-#   - kmsensors: Temperature and hardware sensor monitoring
-#   - hwatch-bin: Process monitoring tool with color output
+#   - hwatch: Process monitoring tool with color output (takes a while to compile)
 #
 # AUR PACKAGES (Community packages from Arch User Repository):
 #   - lazyjournal-bin: Terminal-based journal/note taking app
@@ -35,22 +36,36 @@
     
     - name: "[CLI_TOOLS] Installing Pacman CLI tools..."
       debug:
-        msg: "Installing 6 CLI utilities from official repositories: gping, bandwich, trippy, neoss, kmsensors, hwatch-bin"
+        msg: "Installing 3 CLI utilities from official repositories: gping, bandwhich, trippy"
     
     - name: "[CLI_TOOLS] Install pacman CLI tools from official repositories"
       become: true
       pacman:
         name:
           - gping          # Real-time ping visualization tool
-          - bandwich       # Bandwidth monitor showing per-process usage
+          - extra/bandwhich # Bandwidth monitor showing per-process usage
           - trippy         # Network diagnostic tool (like mtr, shows routing)
-          - hwatch-bin     # Process monitor with colored output
-          - neoss          # System monitor showing CPU/Memory/Disk usage
-          - kmsensors      # Hardware sensor monitoring (CPU temp, fan speed)
         state: present
         update_cache: "{{ pacman_update_cache }}"
       register: pacman_cli_result
       ignore_errors: true
+    
+    # Install AUR CLI tools (neoss, hwatch, and kmsensors)
+    - name: "[CLI_TOOLS] Install neoss from AUR (via paru)"
+      become: true
+      become_user: "{{ ansible_facts.user_id }}"
+      command: "paru -S --noconfirm aur/neoss"
+      register: paru_neoss
+      failed_when: false
+      changed_when: "'error' not in paru_neoss.stdout | lower and paru_neoss.rc == 0"
+    
+    - name: "[CLI_TOOLS] Install hwatch from AUR (via paru)"
+      become: true
+      become_user: "{{ ansible_facts.user_id }}"
+      command: "paru -S --noconfirm aur/hwatch"
+      register: paru_hwatch
+      failed_when: false
+      changed_when: "'error' not in paru_hwatch.stdout | lower and paru_hwatch.rc == 0"
     
     - name: "[CLI_TOOLS] Show pacman installation status"
       debug:
@@ -70,7 +85,7 @@
     # Install AUR packages one at a time to prevent total failure if one fails
     - name: "[CLI_TOOLS] Install lazyjournal-bin (terminal journal app)"
       become: true
-      become_user: "{{ ansible_user_id }}"
+      become_user: "{{ ansible_facts.user_id }}"
       command: "paru -S --noconfirm lazyjournal-bin"
       register: paru_lazyjournal
       failed_when: false
@@ -78,7 +93,7 @@
     
     - name: "[CLI_TOOLS] Install pacseek-bin (Pacman package searcher)"
       become: true
-      become_user: "{{ ansible_user_id }}"
+      become_user: "{{ ansible_facts.user_id }}"
       command: "paru -S --noconfirm pacseek-bin"
       register: paru_pacseek
       failed_when: false
@@ -86,7 +101,7 @@
     
     - name: "[CLI_TOOLS] Install loggo-bin (Log viewer with colors)"
       become: true
-      become_user: "{{ ansible_user_id }}"
+      become_user: "{{ ansible_facts.user_id }}"
       command: "paru -S --noconfirm loggo-bin"
       register: paru_loggo
       failed_when: false
@@ -94,7 +109,7 @@
     
     - name: "[CLI_TOOLS] Install oatmeal-bin (Terminal drawing tool)"
       become: true
-      become_user: "{{ ansible_user_id }}"
+      become_user: "{{ ansible_facts.user_id }}"
       command: "paru -S --noconfirm oatmeal-bin"
       register: paru_oatmeal
       failed_when: false
@@ -102,7 +117,7 @@
     
     - name: "[CLI_TOOLS] Install wifitui-bin (WiFi connection manager TUI)"
       become: true
-      become_user: "{{ ansible_user_id }}"
+      become_user: "{{ ansible_facts.user_id }}"
       command: "paru -S --noconfirm wifitui-bin"
       register: paru_wifitui
       failed_when: false

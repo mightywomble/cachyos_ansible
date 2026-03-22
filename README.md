@@ -52,10 +52,10 @@ Packages from `extra/` repository:
 - `cockpit-files` - Cockpit file manager
 - `cockpit-machines` - Cockpit VM manager
 - `cockpit-storaged` - Cockpit storage manager
-- `cockpit-file-sharing` - Cockpit file sharing
-- `cockpit-sensors` - Cockpit sensors monitoring
-- `cockpit-packman` - Cockpit package manager
-- `cockpit-tools` - Cockpit tools
+- `cockpit-file-sharing` - Cockpit file sharing (AUR)
+- `cockpit-sensors` - Cockpit sensors monitoring (AUR)
+- `cockpit-pacman` - Cockpit package manager (AUR)
+- `cockpit-tools` - Cockpit tools (AUR)
 
 **Development Tools (Pacman):**
 - `ansible` - Infrastructure automation and configuration management
@@ -65,8 +65,6 @@ Packages from `extra/` repository:
 - `gping` - Graphical ping utility
 - `bandwich` - Bandwidth monitoring
 - `trippy` - Network diagnostic tool
-- `neoss` - System monitor
-- `kmsensors` - Hardware monitoring
 
 ### CachyOS Repositories
 Packages from `cachyos/` and `cachyos-extra-v3/`:
@@ -93,7 +91,7 @@ Packages from `cachyos/` and `cachyos-extra-v3/`:
 - `loggo-bin` - Log viewer
 - `oatmeal-bin` - Terminal graphics tool
 - `wifitui-bin` - WiFi TUI
-- `hwatch-bin` - Process monitor
+- `hwatch` - Process monitor (⚠️ Compiles from source - takes 5-15 minutes)
 
 **Communication:**
 - `microsoft-edge-stable-bin` - Microsoft Edge browser
@@ -107,7 +105,7 @@ Packages from `cachyos/` and `cachyos-extra-v3/`:
 - `visual-studio-code-bin` - VS Code editor
 - `termix-bin` - Terminal emulator
 - `tabby-bin` - Terminal multiplexer
-- `aider-chat` - AI coding assistant
+- `aider-chat` - AI coding assistant (⚠️ Compiles from source - takes 10-20 minutes)
 - `lmstudio-bin` - LM Studio interface
 - `owlen` - Development tool
 - `tlm` - Development tool

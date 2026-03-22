@@ -12,12 +12,42 @@
           - extra/cockpit-files
           - extra/cockpit-machines
           - extra/cockpit-storaged
-          - extra/cockpit-file-sharing
-          - extra/cockpit-sensors
-          - extra/cockpit-packman
-          - extra/cockpit-tools
         state: present
         update_cache: "{{ pacman_update_cache }}"
+      ignore_errors: true
+    
+    # AUR cockpit plugins (file-sharing, sensors, pacman, and tools are in AUR, not extra)
+    - name: Install cockpit-file-sharing from AUR via paru
+      become: true
+      become_user: "{{ ansible_facts.user_id }}"
+      command: "paru -S --noconfirm aur/cockpit-file-sharing"
+      register: paru_cockpit_fs
+      failed_when: false
+      changed_when: "'error' not in paru_cockpit_fs.stdout | lower and paru_cockpit_fs.rc == 0"
+    
+    - name: Install cockpit-sensors from AUR via paru
+      become: true
+      become_user: "{{ ansible_facts.user_id }}"
+      command: "paru -S --noconfirm aur/cockpit-sensors"
+      register: paru_cockpit_sensors
+      failed_when: false
+      changed_when: "'error' not in paru_cockpit_sensors.stdout | lower and paru_cockpit_sensors.rc == 0"
+    
+    - name: Install cockpit-pacman from AUR via paru
+      become: true
+      become_user: "{{ ansible_facts.user_id }}"
+      command: "paru -S --noconfirm aur/cockpit-pacman"
+      register: paru_cockpit_pacman
+      failed_when: false
+      changed_when: "'error' not in paru_cockpit_pacman.stdout | lower and paru_cockpit_pacman.rc == 0"
+    
+    - name: Install cockpit-tools from AUR via paru
+      become: true
+      become_user: "{{ ansible_facts.user_id }}"
+      command: "paru -S --noconfirm aur/cockpit-tools"
+      register: paru_cockpit_tools
+      failed_when: false
+      changed_when: "'error' not in paru_cockpit_tools.stdout | lower and paru_cockpit_tools.rc == 0"
 
     # CachyOS repo packages
     - name: Install CachyOS monitoring tools
@@ -26,22 +56,34 @@
         name:
           - cachyos-extra-v3/cockpit
         state: present
+      ignore_errors: true
 
     # AUR packages
     - name: Install AUR monitoring tools via paru
       become: true
-      become_user: "{{ ansible_user_id }}"
+      become_user: "{{ ansible_facts.user_id }}"
       command: "paru -S --noconfirm ssh-ggh"
       register: paru_install_result
       failed_when: paru_install_result.rc not in [0, 1]
       changed_when: "'error' not in paru_install_result.stdout | lower"
 
     # Enable cockpit service
-    - name: Enable and start cockpit service
+    - name: Enable and start cockpit socket
       become: true
       systemd:
         name: cockpit.socket
         enabled: yes
         state: started
+        daemon_reload: yes
+      when: enable_cockpit
+      ignore_errors: yes
+    
+    - name: Enable and start cockpit service
+      become: true
+      systemd:
+        name: cockpit
+        enabled: yes
+        state: started
+        daemon_reload: yes
       when: enable_cockpit
       ignore_errors: yes

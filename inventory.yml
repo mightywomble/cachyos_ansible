@@ -1,10 +1,9 @@
 ---
 all:
-  groups:
+  children:
     cachyos_systems:
       hosts:
         localhost:
           ansible_connection: local
-          ansible_user: "{{ ansible_user_id }}"
           # Override gpu_type for this host if needed:
           # gpu_type: amd  # or 'nvidia' or 'none'
