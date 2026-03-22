@@ -114,7 +114,7 @@ ok: [localhost] => {
     
     📦 INSTALLATION SCOPE:
     ────────────────────────────────────────────────────────────────────
-    Total Packages:         ~70 packages
+    Total Packages:         ~72 packages
     Sources:                Pacman + CachyOS Repos + AUR (via paru)
     Installation Method:    Non-interactive (--noconfirm)
     Installation Time:      15-45 minutes (depending on internet speed)
@@ -123,7 +123,7 @@ ok: [localhost] => {
     ────────────────────────────────────────────────────────────────────
     ✓ CLI Tools              (6 utilities)
     ✓ Communication Apps     (6 apps: Discord, Slack, Spotify, etc.)
-    ✓ Development Tools      (7 tools: VS Code, Termix, Tabby, etc.)
+    ✓ Development Tools      (9 tools: Ansible, Terraform, VS Code, Termix, Tabby, etc.)
     ✓ Productivity Apps      (5 apps: OnlyOffice, Brave, etc.)
     ✓ AI/ML Tools            (5 tools: Ollama + GPU support, etc.)
     ✓ Monitoring Tools       (10 tools: Cockpit + plugins)
@@ -255,6 +255,8 @@ ok: [localhost] => {
     "msg": "
     ✓ Development tools installation finished
     Status Summary:
+    - ansible:                 Installed
+    - terraform:               Installed
     - visual-studio-code-bin:  Installed
     - termix-bin:              Installed
     - tabby-bin:               Installed

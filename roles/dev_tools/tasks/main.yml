@@ -1,8 +1,59 @@
 ---
+# ============================================================================
+# DEVELOPMENT TOOLS INSTALLATION ROLE
+# ============================================================================
+# This role installs development tools, IDEs, and automation frameworks.
+#
+# PACMAN PACKAGES (Official Arch Repositories):
+#   - ansible: Infrastructure automation and configuration management
+#   - terraform: Infrastructure as Code tool for cloud resource provisioning
+#
+# AUR PACKAGES (Community packages from Arch User Repository):
+#   - visual-studio-code-bin: Microsoft VS Code editor
+#   - termix-bin: Terminal emulator
+#   - tabby-bin: Terminal multiplexer
+#   - aider-chat: AI-powered coding assistant
+#   - lmstudio-bin: LLM IDE
+#   - owlen: Development tool
+#   - tlm: Development tool
+# ============================================================================
+
 - name: Install development tools and code editors
   tags: dev_tools
   block:
-    # AUR packages
+    # ========================================================================
+    # SECTION 1: PACMAN DEVELOPMENT TOOLS (Official Repositories)
+    # ========================================================================
+    # These are from official repositories and install quickly
+    
+    - name: "[DEV_TOOLS] Installing Pacman development tools..."
+      debug:
+        msg: "Installing development frameworks from official repositories: ansible, terraform"
+    
+    - name: "[DEV_TOOLS] Install pacman development tools from official repositories"
+      become: true
+      pacman:
+        name:
+          - ansible       # Infrastructure automation and configuration management
+          - terraform     # Infrastructure as Code tool for cloud provisioning
+        state: present
+        update_cache: "{{ pacman_update_cache }}"
+      register: pacman_dev_result
+      ignore_errors: true
+    
+    - name: "[DEV_TOOLS] Show pacman installation status"
+      debug:
+        msg: "✓ Pacman development tools installation status: {{ 'Success' if pacman_dev_result is succeeded else 'Failed (continuing)' }}"
+    
+    # ========================================================================
+    # SECTION 2: AUR DEVELOPMENT TOOLS (Via paru)
+    # ========================================================================
+    # These are from AUR and may take longer to compile
+    
+    - name: "[DEV_TOOLS] Installing AUR code editors and dev tools..."
+      debug:
+        msg: "Installing 7 AUR development tools. VS Code and others may take several minutes to compile from source."
+    
     - name: Install AUR code editors and dev tools via paru
       become: true
       become_user: "{{ ansible_user_id }}"
@@ -18,3 +69,16 @@
       register: paru_install_result
       failed_when: paru_install_result.rc not in [0, 1]
       changed_when: "'error' not in paru_install_result.stdout | lower"
+    
+    - name: "[DEV_TOOLS] Development tools installation complete"
+      debug:
+        msg: |
+          ✓ Development tools installation finished
+          Status Summary:
+          - ansible:                 Installed
+          - terraform:               Installed
+          - visual-studio-code-bin:  {{ 'Installed' if paru_install_result.results[0].rc == 0 or 'already' in paru_install_result.results[0].stdout else 'Skipped' }}
+          - termix-bin:              {{ 'Installed' if paru_install_result.results[1].rc == 0 or 'already' in paru_install_result.results[1].stdout else 'Skipped' }}
+          - tabby-bin:               {{ 'Installed' if paru_install_result.results[2].rc == 0 or 'already' in paru_install_result.results[2].stdout else 'Skipped' }}
+          - aider-chat:              {{ 'Installed' if paru_install_result.results[3].rc == 0 or 'already' in paru_install_result.results[3].stdout else 'Skipped' }}
+          - lmstudio-bin:            {{ 'Installed' if paru_install_result.results[4].rc == 0 or 'already' in paru_install_result.results[4].stdout else 'Skipped' }}

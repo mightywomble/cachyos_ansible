@@ -33,9 +33,9 @@ Choose the guide that matches your needs:
 
 ✅ **Automatic GPU Detection** - Detects AMD, NVIDIA, or no GPU and installs appropriate packages  
 ✅ **System Requirements Verification** - Checks disk space, network, and hardware support  
-✅ **Comprehensive Package Coverage** - 70+ packages organized into logical roles  
+✅ **Comprehensive Package Coverage** - 72+ packages organized into logical roles  
 ✅ **Full Automation** - No selective toggles; installs everything in one pass  
-✅ **Service Management** - Auto-enables Cockpit and Ollama services  
+✅ **Service Management** - Auto-enables Cockpit and Ollama services
 
 ## Package Breakdown by Repository
 
@@ -56,6 +56,10 @@ Packages from `extra/` repository:
 - `cockpit-sensors` - Cockpit sensors monitoring
 - `cockpit-packman` - Cockpit package manager
 - `cockpit-tools` - Cockpit tools
+
+**Development Tools (Pacman):**
+- `ansible` - Infrastructure automation and configuration management
+- `terraform` - Infrastructure as Code tool for cloud resource provisioning
 
 **CLI Tools (Pacman):**
 - `gping` - Graphical ping utility
