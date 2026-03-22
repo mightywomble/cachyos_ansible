@@ -8,16 +8,16 @@ Ansible playbook to install and configure all your CachyOS software using the `p
 
 Choose the guide that matches your needs:
 
-|| Guide | Purpose | Read Time |
-||-------|---------|----------|
-|| **[START_HERE.md](START_HERE.md)** | Navigation hub, quick overview, common questions | 5 min |
-|| **[GETTING_STARTED.md](GETTING_STARTED.md)** | Step-by-step walkthrough for complete beginners | 10 min |
-|| **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** | Detailed execution guide with expected output | 15 min |
-|| **[README.md](README.md)** | This file - package details, configuration, troubleshooting | 20 min |
-|| **[ADDING_PACKAGES.md](ADDING_PACKAGES.md)** | How to add new packages to the installer | 10 min |
-|| **[QUICKSTART.md](QUICKSTART.md)** | Quick reference for common commands | 5 min |
-|| **[FILE_INDEX.md](FILE_INDEX.md)** | Project structure and file descriptions | 10 min |
-|| **[ENHANCEMENTS_SUMMARY.md](ENHANCEMENTS_SUMMARY.md)** | What's new and how it was enhanced | 10 min |
+| Guide | Purpose | Read Time |
+|-------|---------|----------|
+| **[START_HERE.md](START_HERE.md)** | Navigation hub, quick overview, common questions | 5 min |
+| **[GETTING_STARTED.md](GETTING_STARTED.md)** | Step-by-step walkthrough for complete beginners | 10 min |
+| **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** | Detailed execution guide with expected output | 15 min |
+| **[README.md](README.md)** | This file - package details, configuration, troubleshooting | 20 min |
+| **[ADDING_PACKAGES.md](ADDING_PACKAGES.md)** | How to add new packages to the installer | 10 min |
+| **[QUICKSTART.md](QUICKSTART.md)** | Quick reference for common commands | 5 min |
+| **[FILE_INDEX.md](FILE_INDEX.md)** | Project structure and file descriptions | 10 min |
+| **[ENHANCEMENTS_SUMMARY.md](ENHANCEMENTS_SUMMARY.md)** | What's new and how it was enhanced | 10 min |
 
 ### Quick Paths
 
